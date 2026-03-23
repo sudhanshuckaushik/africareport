@@ -1,304 +1,640 @@
-import { useState } from "react";
-
-const sections = ["Summary", "Gambia", "Zimbabwe", "Botswana", "Zambia", "Matrix"];
-
-const countries = [
-  {
-    id: "gambia", num: "01", name: "The Gambia",
-    tagline: "West Africa's smallest nation — emerging democracy, frontier hydrocarbon potential",
-    stats: [["2.7M","Population"],["$2.1B","GDP"],["Moderate","Political Risk"],["GMD","Currency"]],
-    sectors: [
-      { name: "Mining", score: 45, plays: ["Coastal heavy mineral sands (ilmenite, zircon, rutile) — same geological belt as Senegal's TiZir Grande Cote operation. Exploration: $300K–600K. Revenue if confirmed: $3–6M/yr.", "Silica sand for regional export — high-purity deposits in the Gambia River estuary. Capital: $500K–1.5M. Fast payback."] },
-      { name: "Dairy & Agriculture", score: 62, plays: ["UHT dairy plant (5,000–10,000 litres/day) — The Gambia imports 90% of packaged dairy. Zero formal domestic processing. First-mover advantage. Investment: $2–4M. Revenue: $1.4–1.8M/yr at 30–40% gross margin.", "Groundnut oil processing — Export raw groundnuts at commodity prices today. A screw press operation (10 t/day) yields $1.7–2.3M/yr revenue. Capital: $600K–1.2M.", "Integrated broiler poultry — Fresh chilled chicken commands 40–60% premium over frozen imports. 50,000 birds/cycle x 6–7 cycles/yr. Investment: $1.5–2.5M."] },
-      { name: "Infrastructure & Energy", score: 70, plays: ["Solar mini-grid portfolio — NAWEC provides <12 hours reliable power/day. 10–20 village mini-grids (50–200kW each). Capital: $3–6M. Revenue: $400K–700K/yr on 15–20 year government offtake concession.", "Oil wildcard — Senegal's Sangomar field came online 2024. Gambia's offshore blocks are in the same geological basin. BP holds exploration licenses. A hydrocarbon confirmation transforms the entire investment calculus."] }
-    ],
-    political: "Key relationship: NPP party network and GIEPA (Gambia Investment and Export Promotion Agency). A community investment fund in the Central River Division — Barrow's home region — generates political goodwill at low cost. 2026 elections approaching: ideal moment to be seen bringing jobs and development.",
-    riskColor: "#d4a017"
-  },
-  {
-    id: "zimbabwe", num: "02", name: "Zimbabwe",
-    tagline: "Africa's most resource-rich underperformer — highest ceiling upside on this list",
-    stats: [["16.3M","Population"],["$26.3B","GDP"],["High","Political Risk"],["ZiG / USD","Currency"]],
-    sectors: [
-      { name: "Mining", score: 92, plays: ["Lithium pegmatite mining — Arcadia project acquired by Huayou Cobalt (China) for $422M in 2022. Smaller claims in Bikita-Mberengwa and Goromonzi-Marondera belts remain accessible. Exploration: $500K–1.5M. Development: $8–20M capex. Revenue: $35–60M/yr at 50,000 t/yr spodumene.", "Chrome mining and ferrochrome — Small open-pit claims along Great Dyke (Mutorashanga to Shurugwi). 30,000–60,000 t/yr chromite. Capital: $3–8M. Revenue: $7–11M/yr. Ferrochrome upgrade adds $8–15M but multiplies value 5–6x.", "Artisanal gold aggregation — Licensed buying center aggregating informal sector output and delivering to Fidelity Printers. Trading/services model. Capital: $1–3M. Faster returns than mining. Government priority."] },
-      { name: "Dairy & Agriculture", score: 58, plays: ["Dairy farm rehabilitation in Mashonaland — Contract farming on 2–4 leased farms with existing (dilapidated) dairy infrastructure. Introduce Holstein/Jersey crosses. Central UHT facility. Investment: $4–8M for 10,000 litre/day operation. Revenue: $4–5.1M/yr.", "Soya bean processing — Significant Mashonaland production currently underprocessed. Crushing plant producing soya oil and soya cake. Capital: $1.5–2.5M. Revenue: $3–5M/yr at 15–20% margins."] },
-      { name: "Infrastructure & Energy", score: 62, plays: ["Captive solar for mining — 8–16 hours load-shedding daily. Any mining investment requires own power. 2–5MW solar + storage: $1.5–4M. Eliminates diesel. Excess power sold to neighbors under IPP license. Payback: 4–6 years."] }
-    ],
-    political: "Enter through ZIDA + ZANU-PF-connected BEE partner (20–35% genuine equity) with Ministry of Mines access. Political donations through ZANU-PF Development Fund or constituency project sponsorship in Mashonaland/Midlands. Engage Harare's Gujarati business community before any government approach. Power sits across two factions: Mnangagwa and VP Chiwenga's military establishment — understand both.",
-    riskColor: "#c0392b"
-  },
-  {
-    id: "botswana", num: "03", name: "Botswana",
-    tagline: "Africa's governance benchmark — lowest risk entry, historic 2024 political transition",
-    stats: [["2.6M","Population"],["$19.3B","GDP"],["Low","Political Risk"],["BWP (Pula)","Currency"]],
-    sectors: [
-      { name: "Mining", score: 88, plays: ["Manganese, Kalahari Field — Undeveloped Botswana side of the world's largest manganese deposit. Serule block and Dukwe-Nata corridor. Exploration: $1–2M. Small open-pit 50,000–100,000 t/yr: $8–15M capex. Revenue: $18–24M/yr against $8–10M opex.", "Copper-nickel tailings reprocessing (Selebi-Phikwe) — BCL tailings dam holds 100M tonnes at 0.4–0.6% Cu and 0.2–0.3% Ni. Modern froth flotation recovers economically at current prices. Investment: $10–18M. Massive political goodwill — 5,000 jobs were lost when BCL closed.", "Semi-precious stones and lapidary — Agate, jasper, decorative granite unworked. Lapidary operation exporting to Jaipur/Surat leverages Gujarati networks directly. Capital: $300K–600K. Low complexity, high political visibility."] },
-      { name: "Dairy & Agriculture", score: 52, plays: ["Specialty dairy and artisan cheese — South African mass dairy dominates on price. Premium/specialty segment underserved. 200–400 cow artisan dairy (Holstein/Jersey) producing fresh milk, yoghurt, soft cheese, butter. Gaborone hotels and safari lodges pay premium. Investment: $2–3.1M. Revenue: $600K–900K/yr milk plus cheese margin.", "Broiler poultry complex — 100,000-bird complex near Gaborone using local sorghum/maize for feed. Fresh chilled chicken premium over frozen imports. Investment: $2–3.5M. Revenue: $2–4M/yr at scale."] },
-      { name: "Infrastructure & Energy", score: 70, plays: ["Solar IPP — 2,400+ kWh/m2/yr irradiance (world's highest). 5–10MW captive solar licensable under 2017 Electricity Supply Act. Capital: $4–8M for 5MW. Payback: 5–7 years. Green hydrogen pilot (solar + electrolysis) attracting DFI interest under new Boko administration."] }
-    ],
-    political: "Botswana requires the least political engineering. File through BITC (Botswana Investment and Trade Centre) — a genuinely non-corrupt agency. Engage Ministry of Mineral Resources. The Debswana model (50/50 JV with government) is the expected template — build 15–20% carried interest for a government entity into any mining proposal from the outset. Historic Nov 2024 election (first opposition win since 1966) creates a window — Boko needs diversification wins urgently.",
-    riskColor: "#27ae60"
-  },
-  {
-    id: "zambia", num: "04", name: "Zambia",
-    tagline: "Southern Africa's reform story — world-class emeralds, severe dairy deficit, Hichilema's open door",
-    stats: [["20.6M","Population"],["$29.4B","GDP"],["Low-Moderate","Political Risk"],["ZMW (Kwacha)","Currency"]],
-    sectors: [
-      { name: "Mining", score: 88, plays: ["Emerald mining, Kafubu Belt, Lufwanyama — The world's most important source of gem-quality emeralds. Kagem produced 41M carats in 2023 (~$120M auction revenue). Consolidate 2–4 adjacent ASM licenses into a managed operation. Investment: $1.5–3M. Revenue: $4–40M/yr depending on quality mix. Selling directly into Jaipur/Surat eliminates the 30–50% auction intermediary margin — a structural advantage unique to this investor.", "Manganese, Southern Province — Choma-Kalomo area. Open-pit 30,000–50,000 t/yr. Capital: $5–10M. Revenue: $5–9M/yr. Reliable cash generation.", "Limestone and construction aggregates — Lusaka Basin deposits. Quarrying for fast-growing Lusaka construction sector. Capital: $1–3M. Consistent cash flow. Works as a base business supporting more capital-intensive plays."] },
-      { name: "Dairy & Agriculture", score: 80, plays: ["Commercial dairy farm, Central/Southern Province — 500–800 cow Holstein Friesian farm. 7,000 litres/day at farmgate $0.35–0.45/litre = $900K–1.15M/yr raw milk revenue. Investment: $1.6–2.7M. Real value is in processing.", "Dairy processing plant, Lusaka — 20,000 litre/day UHT plant. Parmalat (SA) is the dominant brand but is an importer, not processor. Investment: $3–5M. Revenue: $6.5–9M/yr. EBITDA: $2.6–3.6M/yr at 40% gross margin. ZDA 5-year tax holiday available.", "Cattle feedlot and beef processing — Buy lean smallholder cattle, finish on local maize/soya, supply Lusaka abattoir. Politically popular. Investment: $2–4M for 5,000-head feedlot.", "Soya and sunflower oil processing — Zambia is Eastern Africa's largest soya producer. Crushing plant for domestic soya oil and cake (strong poultry feed demand). Capital: $1.5–3M. Revenue: $3–6M/yr at 15–22% margins."] },
-      { name: "Infrastructure & Energy", score: 68, plays: ["Cold chain logistics network — Biggest constraint on Zambian dairy/agri development. Refrigerated transport + cold storage hubs in Lusaka, Kitwe, Livingstone, Chipata. Investment: $3–6M. Revenue from third-party clients plus enables own dairy operation.", "Solar IPP, Copperbelt — 10–20MW solar IPP supplying industrial consumers under ZESCO wheeling agreement. Stable USD-denominated revenue. Capital: $8–16M. Revenue: $2.5–5M/yr."] }
-    ],
-    political: "President Hichilema is himself a businessman — he built a cattle ranching and financial services empire. His administration created a one-stop shop through the Zambia Development Agency (ZDA). He has personally received Indian investor delegations. A properly structured proposal through ZDA + a note through India's High Commission in Lusaka will receive a ministerial response within weeks. Zambia's established Gujarati business community in Lusaka, Kitwe, and Ndola is the single most valuable first call.",
-    riskColor: "#2980b9"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EXALT Strategic Advisory — Africa Investment Report 2026</title>
+<!-- EXALT Strategic Advisory | Africa Investment Report 2026 | Strictly Confidential -->
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0a0a0a;
+    --white: #ffffff;
+    --gray-100: #f5f5f5;
+    --gray-200: #e8e8e8;
+    --gray-400: #999;
+    --gray-600: #555;
+    --accent: #c8973a;
   }
-];
+  html { scroll-behavior: smooth; }
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--black); background: #f0efed; font-size: 16px; line-height: 1.7; }
 
-function ScoreBar({ score }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-      <div style={{ flex: 1, height: 3, background: "#e0e0e0" }}>
-        <div style={{ width: score + "%", height: "100%", background: "#0a0a0a", transition: "width 1s ease" }} />
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--black); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 56px; }
+  .nav-logo { display: flex; align-items: baseline; gap: 10px; }
+  .nav-logo-main { font-size: 18px; font-weight: 900; color: var(--white); letter-spacing: -0.02em; }
+  .nav-logo-sub { font-size: 9px; font-weight: 300; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gray-400); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a { color: var(--gray-400); text-decoration: none; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 10px; border-radius: 4px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--white); }
+  .nav-confidential { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; }
+
+  /* HERO */
+  .hero { min-height: 100vh; background: var(--black); display: flex; flex-direction: column; justify-content: flex-end; padding: 80px 80px 80px; margin-top: 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.03) 79px, rgba(255,255,255,0.03) 80px); pointer-events: none; }
+  .hero-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
+  .hero-title { font-size: clamp(48px, 8vw, 100px); font-weight: 900; color: var(--white); line-height: 0.95; letter-spacing: -0.03em; margin-bottom: 32px; }
+  .hero-title span { font-weight: 300; color: var(--gray-400); }
+  .hero-rule { width: 48px; height: 3px; background: var(--accent); margin-bottom: 24px; }
+  .hero-sub { font-size: 14px; font-weight: 300; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 48px; }
+  .hero-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); max-width: 600px; }
+  .hero-meta-item { background: rgba(255,255,255,0.04); padding: 16px 20px; }
+  .hero-meta-item .k { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 4px; }
+  .hero-meta-item .v { font-size: 12px; font-weight: 500; color: var(--white); }
+  .hero-scroll { position: absolute; bottom: 32px; right: 80px; font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-400); display: flex; align-items: center; gap: 10px; }
+  .hero-scroll::before { content: ''; display: block; width: 40px; height: 1px; background: var(--gray-400); }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+  section { padding: 100px 0; }
+  section + section { border-top: 1px solid var(--gray-200); }
+
+  /* SECTION LABELS */
+  .section-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+  .section-title { font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: var(--black); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 16px; }
+  .section-title::after { content: ''; display: block; width: 32px; height: 3px; background: var(--black); margin-top: 16px; }
+  .section-lead { font-size: 17px; font-weight: 300; color: var(--gray-600); max-width: 680px; line-height: 1.8; margin-bottom: 48px; }
+
+  /* EXEC SUMMARY */
+  .exec-bg { background: var(--white); }
+  .exec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .exec-body p { font-size: 15px; font-weight: 300; margin-bottom: 16px; color: #222; line-height: 1.8; }
+  .exec-body p strong { font-weight: 700; color: var(--black); }
+  .highlight-box { background: var(--black); color: var(--white); padding: 28px 32px; margin: 28px 0; }
+  .highlight-box .hl { font-size: 9px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .highlight-box p { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,0.85); font-weight: 300; margin: 0; }
+  .highlight-box p strong { color: var(--white); font-weight: 700; }
+  .callout { border-left: 3px solid var(--black); padding: 16px 20px; margin: 20px 0; background: var(--gray-100); }
+  .callout.risk { border-left-color: #333; }
+  .callout.political { border-left-color: var(--accent); }
+  .callout .cl { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+  .callout p { font-size: 14px; line-height: 1.75; margin: 0; color: #333; font-weight: 300; }
+  .callout p strong { font-weight: 700; color: var(--black); }
+
+  /* SUMMARY TABLE */
+  .summary-table-wrap { overflow-x: auto; margin-top: 40px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--black); }
+  thead th { padding: 12px 16px; text-align: left; color: var(--white); font-weight: 700; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+  tbody tr { border-bottom: 1px solid var(--gray-200); transition: background 0.15s; }
+  tbody tr:hover { background: var(--gray-100); }
+  tbody td { padding: 12px 16px; font-weight: 300; color: #333; vertical-align: top; }
+  tbody td:first-child { font-weight: 700; color: var(--black); }
+
+  /* COUNTRY SECTIONS */
+  .country-section { background: var(--white); }
+  .country-section:nth-child(odd) { background: #fafafa; }
+  .country-header-bar { background: var(--black); padding: 48px 0 40px; margin-bottom: 64px; }
+  .country-num { font-size: 9px; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .country-name { font-size: clamp(40px, 7vw, 80px); font-weight: 900; color: var(--white); line-height: 0.95; letter-spacing: -0.03em; margin-bottom: 12px; }
+  .country-tagline { font-size: 14px; font-weight: 300; color: var(--gray-400); margin-bottom: 32px; max-width: 640px; line-height: 1.7; }
+  .country-stats { display: flex; gap: 0; border: 1px solid rgba(255,255,255,0.15); width: fit-content; }
+  .country-stat { padding: 12px 24px; border-right: 1px solid rgba(255,255,255,0.15); }
+  .country-stat:last-child { border-right: none; }
+  .country-stat .sv { font-size: 14px; font-weight: 700; color: var(--white); }
+  .country-stat .sk { font-size: 9px; font-weight: 400; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 2px; }
+
+  /* SECTOR BLOCKS */
+  .sector-block { margin-bottom: 64px; }
+  .sector-label { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+  .sector-label-text { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--black); }
+  .sector-score { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .score-track { flex: 1; height: 3px; background: var(--gray-200); max-width: 200px; }
+  .score-fill { height: 100%; background: var(--black); }
+  .score-val { font-size: 11px; font-weight: 700; color: var(--black); }
+  h3.sub-head { font-size: 18px; font-weight: 700; color: var(--black); margin: 24px 0 10px; }
+  h4.play-head { font-size: 14px; font-weight: 700; color: var(--black); margin: 20px 0 8px; }
+  .body-text { font-size: 15px; font-weight: 300; color: #222; line-height: 1.8; margin-bottom: 14px; }
+  .body-text strong { font-weight: 700; color: var(--black); }
+  ul.play-list { list-style: none; margin: 10px 0 18px; padding: 0; }
+  ul.play-list li { padding: 7px 0 7px 20px; position: relative; font-size: 14px; font-weight: 300; color: #333; line-height: 1.7; border-bottom: 1px solid var(--gray-200); }
+  ul.play-list li:last-child { border-bottom: none; }
+  ul.play-list li::before { content: '—'; position: absolute; left: 0; color: var(--black); font-weight: 700; }
+  ul.play-list li strong { font-weight: 700; color: var(--black); }
+  .avoid-box { background: var(--gray-100); border: 1px solid var(--gray-200); border-left: 3px solid var(--black); padding: 16px 20px; margin: 20px 0; }
+  .avoid-box .al { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 8px; }
+  .avoid-box p { font-size: 13px; font-weight: 300; color: #333; margin: 0; line-height: 1.7; }
+  .avoid-box p strong { font-weight: 700; color: var(--black); }
+
+  /* MATRIX */
+  .matrix-bg { background: var(--black); }
+  .matrix-bg .section-title { color: var(--white); }
+  .matrix-bg .section-title::after { background: var(--accent); }
+  .matrix-bg .section-lead { color: var(--gray-400); }
+  .matrix-bg .section-eyebrow { color: var(--accent); }
+  .matrix-bg table { border: 1px solid rgba(255,255,255,0.1); }
+  .matrix-bg thead tr { background: rgba(255,255,255,0.08); }
+  .matrix-bg thead th { color: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .matrix-bg tbody tr { border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .matrix-bg tbody tr:hover { background: rgba(255,255,255,0.04); }
+  .matrix-bg tbody td { color: rgba(255,255,255,0.7); }
+  .matrix-bg tbody td:first-child { color: var(--white); }
+
+  .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: rgba(255,255,255,0.08); margin-top: 48px; }
+  .phase-card { background: var(--black); padding: 32px; border: 1px solid rgba(255,255,255,0.08); }
+  .phase-num { font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .phase-title { font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 14px; }
+  .phase-body { font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.65); line-height: 1.75; }
+  .phase-body strong { color: var(--white); font-weight: 600; }
+
+  /* FOOTER */
+  footer { background: #050505; padding: 48px 0; border-top: 1px solid rgba(255,255,255,0.08); }
+  .footer-inner { display: flex; justify-content: space-between; align-items: center; }
+  .footer-logo-main { font-size: 22px; font-weight: 900; color: var(--white); letter-spacing: -0.02em; }
+  .footer-logo-sub { font-size: 8px; font-weight: 300; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gray-400); }
+  .footer-note { font-size: 11px; color: var(--gray-400); text-align: right; line-height: 1.8; max-width: 420px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 60px 24px; }
+    .hero-meta { grid-template-columns: 1fr 1fr; }
+    .container { padding: 0 24px; }
+    section { padding: 64px 0; }
+    .exec-grid { grid-template-columns: 1fr; gap: 40px; }
+    .country-stats { flex-wrap: wrap; }
+    .phase-grid { grid-template-columns: 1fr; }
+    .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-note { text-align: center; }
+    .country-header-bar { padding: 32px 0 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="nav-logo-main">EXALT</span>
+    <span class="nav-logo-sub">Strategic Advisory</span>
+  </div>
+  <div class="nav-links">
+    <a href="#executive-summary">Summary</a>
+    <a href="#gambia">Gambia</a>
+    <a href="#zimbabwe">Zimbabwe</a>
+    <a href="#botswana">Botswana</a>
+    <a href="#zambia">Zambia</a>
+    <a href="#matrix">Matrix</a>
+  </div>
+  <div class="nav-confidential">Strictly Confidential</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Investment Opportunity Memorandum &nbsp;·&nbsp; March 2026</div>
+  <div class="hero-title">African Market<br><span>Entry</span><br>Analysis</div>
+  <div class="hero-rule"></div>
+  <div class="hero-sub">Mining &nbsp;·&nbsp; Dairy &nbsp;·&nbsp; Agriculture &nbsp;·&nbsp; Infrastructure &nbsp;·&nbsp; Energy</div>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><div class="k">Countries</div><div class="v">Gambia · Zimbabwe · Botswana · Zambia</div></div>
+    <div class="hero-meta-item"><div class="k">Entry Capital Range</div><div class="v">$2M — $25M per opportunity</div></div>
+    <div class="hero-meta-item"><div class="k">Classification</div><div class="v">Strictly Confidential</div></div>
+    <div class="hero-meta-item"><div class="k">Investor Profile</div><div class="v">Private mid-scale investor group</div></div>
+    <div class="hero-meta-item"><div class="k">Prepared By</div><div class="v">EXALT Strategic Advisory</div></div>
+    <div class="hero-meta-item"><div class="k">Date</div><div class="v">March 2026</div></div>
+  </div>
+  <div class="hero-scroll">Scroll to read</div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<section id="executive-summary" class="exec-bg">
+  <div class="container">
+    <div class="section-eyebrow">Overview</div>
+    <h2 class="section-title">Executive Summary</h2>
+    <div class="exec-grid">
+      <div class="exec-body">
+        <p>This memorandum has been prepared for a Gujarati-led private investor group evaluating commercial opportunities across four Sub-Saharan African countries. The group operates at a scale that can move decisively, absorb moderate risk, and build genuine relationships with political principals in each country — advantages that larger Western or Chinese competitors do not have.</p>
+        <p>The central thesis is simple: <strong>political access is the multiplier.</strong> In each of these countries, the difference between a modestly profitable business and an exceptional one is whether the investor has a relationship with the right minister, the right party financier, or the right local partner with state connections.</p>
+        <p>The investor group has several natural advantages. Gujarati merchant networks have a 150-year commercial history in East and Southern Africa. Community trust, diaspora networks, and a reputation for long-term engagement rather than extractive short-termism are genuine differentiators. In Zimbabwe and Zambia especially, Indian-origin business communities are well-established and can provide introductions, local structuring advice, and on-the-ground operational management.</p>
+        <div class="highlight-box">
+          <div class="hl">Top Recommendation</div>
+          <p><strong>Zambia is the highest-priority entry point.</strong> President Hichilema's government is actively courting mid-scale foreign investors. The emerald mining sector has sub-$5M entry opportunities with exceptional upside — particularly for a Gujarati investor with direct access to Jaipur and Surat gemstone markets. The dairy sector is chronically undersupplied. Botswana is the lowest-risk first investment. Zimbabwe has the highest ceiling but requires careful political structuring. The Gambia is a long-duration speculative play on oil, infrastructure, and consumer goods.</p>
+        </div>
       </div>
-      <span style={{ fontSize: 11, fontWeight: 700, color: "#0a0a0a", minWidth: 42 }}>{score}/100</span>
-    </div>
-  );
-}
-
-export default function App() {
-  const [activeSection, setActiveSection] = useState("Summary");
-  const [activeCountry, setActiveCountry] = useState("gambia");
-  const [expandedSector, setExpandedSector] = useState(null);
-  const [showPolitical, setShowPolitical] = useState(false);
-
-  const country = countries.find(c => c.id === activeCountry);
-
-  const renderSummary = () => (
-    <div>
-      {/* Hero */}
-      <div style={{ background: "#0a0a0a", padding: "56px 40px", marginBottom: 2 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c8973a", marginBottom: 16 }}>Investment Opportunity Memorandum · March 2026</div>
-        <div style={{ fontSize: 52, fontWeight: 900, color: "#fff", lineHeight: 0.95, letterSpacing: "-0.03em", marginBottom: 12 }}>
-          African<br /><span style={{ fontWeight: 300, color: "#666" }}>Market</span><br />Analysis
-        </div>
-        <div style={{ width: 40, height: 3, background: "#c8973a", margin: "20px 0" }} />
-        <div style={{ fontSize: 10, fontWeight: 300, letterSpacing: "0.18em", textTransform: "uppercase", color: "#666", marginBottom: 32 }}>Mining · Dairy · Agriculture · Infrastructure · Energy</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", maxWidth: 520 }}>
-          {[["Countries","Gambia · Zimbabwe · Botswana · Zambia"],["Entry Capital","$2M — $25M per opportunity"],["Classification","Strictly Confidential"],["Investor Profile","Private mid-scale investor group"],["Prepared By","EXALT Strategic Advisory"],["Date","March 2026"]].map(([k,v]) => (
-            <div key={k} style={{ background: "rgba(255,255,255,0.04)", padding: "12px 16px" }}>
-              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#666", marginBottom: 4 }}>{k}</div>
-              <div style={{ fontSize: 11, fontWeight: 500, color: "#fff" }}>{v}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Exec summary */}
-      <div style={{ background: "#fff", padding: "48px 40px" }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: "#999", marginBottom: 6 }}>Overview</div>
-        <div style={{ fontSize: 28, fontWeight: 900, color: "#0a0a0a", letterSpacing: "-0.02em", marginBottom: 4 }}>Executive Summary</div>
-        <div style={{ width: 28, height: 3, background: "#0a0a0a", marginBottom: 24 }} />
-        <p style={{ fontSize: 14, fontWeight: 300, color: "#333", lineHeight: 1.8, marginBottom: 14 }}>This memorandum has been prepared for a Gujarati-led private investor group evaluating commercial opportunities across four Sub-Saharan African countries. The group operates at a scale that can move decisively and build genuine relationships with political principals — advantages that larger Western or Chinese competitors do not have.</p>
-        <p style={{ fontSize: 14, fontWeight: 300, color: "#333", lineHeight: 1.8, marginBottom: 24 }}>The central thesis: <strong style={{ fontWeight: 700, color: "#0a0a0a" }}>political access is the multiplier.</strong> In each country, the difference between a modestly profitable business and an exceptional one is whether the investor has a relationship with the right minister, the right party financier, or the right local partner with state connections.</p>
-
-        <div style={{ background: "#0a0a0a", padding: "24px 28px", marginBottom: 28 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#c8973a", marginBottom: 10 }}>Top Recommendation</div>
-          <p style={{ fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,0.85)", lineHeight: 1.8, margin: 0 }}><strong style={{ color: "#fff", fontWeight: 700 }}>Zambia is the highest-priority entry point.</strong> President Hichilema's government is actively courting mid-scale foreign investors. The emerald mining sector has sub-$5M entry opportunities with exceptional upside — particularly for a Gujarati investor with direct Jaipur and Surat gemstone market access. Botswana is the lowest-risk first investment. Zimbabwe has the highest ceiling but requires careful political structuring. The Gambia is a long-duration speculative play with oil upside.</p>
-        </div>
-
-        {/* Table */}
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-            <thead>
-              <tr style={{ background: "#0a0a0a" }}>
-                {["Country","Best Sector","Entry Capital","Risk","Returns Timeline"].map(h => (
-                  <th key={h} style={{ padding: "10px 14px", textAlign: "left", color: "#fff", fontWeight: 700, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
+      <div>
+        <div class="summary-table-wrap">
+          <table>
+            <thead><tr><th>Country</th><th>Best Sector</th><th>Entry Capital</th><th>Risk</th><th>Returns Timeline</th></tr></thead>
             <tbody>
-              {[["The Gambia","Dairy / Poultry","$2M–$8M","Moderate","3–5 yrs"],["Zimbabwe","Lithium / Chrome","$5M–$25M","High","4–7 yrs"],["Botswana","Manganese / Cu-Ni","$5M–$20M","Low","4–6 yrs"],["Zambia","Emeralds / Dairy","$3M–$15M","Low-Moderate","2–5 yrs"]].map((row, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #e8e8e8", background: i % 2 === 0 ? "#fff" : "#f9f9f9" }}>
-                  {row.map((cell, j) => (
-                    <td key={j} style={{ padding: "10px 14px", fontWeight: j === 0 ? 700 : 300, color: j === 0 ? "#0a0a0a" : "#444", fontSize: 12 }}>{cell}</td>
-                  ))}
-                </tr>
-              ))}
+              <tr><td>The Gambia</td><td>Dairy / Poultry</td><td>$2M–$8M</td><td>Moderate</td><td>3–5 yrs</td></tr>
+              <tr><td>Zimbabwe</td><td>Lithium / Chrome</td><td>$5M–$25M</td><td>High</td><td>4–7 yrs</td></tr>
+              <tr><td>Botswana</td><td>Manganese / Cu-Ni</td><td>$5M–$20M</td><td>Low</td><td>4–6 yrs</td></tr>
+              <tr><td>Zambia</td><td>Emeralds / Dairy</td><td>$3M–$15M</td><td>Low-Mod</td><td>2–5 yrs</td></tr>
             </tbody>
           </table>
         </div>
-      </div>
-    </div>
-  );
-
-  const renderCountry = () => (
-    <div>
-      {/* Country header */}
-      <div style={{ background: "#0a0a0a", padding: "40px 40px 32px" }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c8973a", marginBottom: 8 }}>Country {country.num} of 04</div>
-        <div style={{ fontSize: 48, fontWeight: 900, color: "#fff", lineHeight: 0.95, letterSpacing: "-0.03em", marginBottom: 10 }}>{country.name}</div>
-        <div style={{ fontSize: 12, fontWeight: 300, color: "#888", marginBottom: 24, maxWidth: 500, lineHeight: 1.6 }}>{country.tagline}</div>
-        <div style={{ display: "flex", gap: 0, border: "1px solid rgba(255,255,255,0.15)", width: "fit-content", flexWrap: "wrap" }}>
-          {country.stats.map(([v, k]) => (
-            <div key={k} style={{ padding: "10px 20px", borderRight: "1px solid rgba(255,255,255,0.15)" }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{v}</div>
-              <div style={{ fontSize: 8, fontWeight: 400, color: "#666", textTransform: "uppercase", letterSpacing: "0.12em", marginTop: 2 }}>{k}</div>
-            </div>
-          ))}
+        <div class="callout risk" style="margin-top:24px;">
+          <div class="cl">Compliance Note</div>
+          <p>Political engagement must be structured to avoid UK Bribery Act and US FCPA exposure. Community investment funds, party donations through legal channels, and employment arrangements are defensible. A Mauritius or Singapore holding entity is recommended to limit direct jurisdiction exposure.</p>
         </div>
-      </div>
-
-      {/* Political */}
-      <div style={{ background: "#fff", padding: "28px 40px", borderBottom: "1px solid #e8e8e8" }}>
-        <button onClick={() => setShowPolitical(!showPolitical)}
-          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}>
-          <div>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#c8973a" }}>Political Strategy</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#0a0a0a", marginTop: 4 }}>Political Landscape &amp; Entry Strategy</div>
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 300, color: "#999", transition: "transform 0.2s", transform: showPolitical ? "rotate(45deg)" : "none" }}>+</div>
-        </button>
-        {showPolitical && (
-          <div style={{ marginTop: 16, borderLeft: "3px solid #c8973a", paddingLeft: 16, background: "#fdf9f2", padding: "16px 16px 16px 20px" }}>
-            <p style={{ fontSize: 13, fontWeight: 300, color: "#333", lineHeight: 1.8, margin: 0 }}>{country.political}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Sectors */}
-      <div style={{ background: "#fff", padding: "0 40px 40px" }}>
-        {country.sectors.map((sector, si) => (
-          <div key={si} style={{ borderBottom: "1px solid #e8e8e8", padding: "24px 0" }}>
-            <button onClick={() => setExpandedSector(expandedSector === si ? null : si)}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-              <div style={{ textAlign: "left", flex: 1 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#999", marginBottom: 4 }}>{sector.name}</div>
-                <ScoreBar score={sector.score} />
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 300, color: "#999", marginLeft: 20, transition: "transform 0.2s", transform: expandedSector === si ? "rotate(45deg)" : "none" }}>+</div>
-            </button>
-            {expandedSector === si && (
-              <div style={{ marginTop: 16 }}>
-                {sector.plays.map((play, pi) => {
-                  const [title, ...rest] = play.split(" — ");
-                  return (
-                    <div key={pi} style={{ marginBottom: 14, paddingLeft: 16, borderLeft: "2px solid #e0e0e0" }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#0a0a0a", marginBottom: 4 }}>{title}</div>
-                      <div style={{ fontSize: 12, fontWeight: 300, color: "#555", lineHeight: 1.7 }}>{rest.join(" — ")}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderMatrix = () => (
-    <div style={{ background: "#0a0a0a", minHeight: 400, padding: "48px 40px" }}>
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: "#c8973a", marginBottom: 8 }}>Summary</div>
-      <div style={{ fontSize: 28, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em", marginBottom: 4 }}>Comparative Matrix</div>
-      <div style={{ width: 28, height: 3, background: "#c8973a", marginBottom: 28 }} />
-
-      <div style={{ overflowX: "auto", marginBottom: 40 }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-          <thead>
-            <tr style={{ background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-              {["Country","Best Mining Play","Best Dairy/Agri","Entry Capital","Risk","Return"].map(h => (
-                <th key={h} style={{ padding: "10px 14px", textAlign: "left", color: "rgba(255,255,255,0.6)", fontWeight: 700, fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase" }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ["The Gambia","Mineral sands / silica","UHT dairy + poultry","$2M–$6M","Moderate","Medium"],
-              ["Zimbabwe","Lithium / chrome ore","Dairy rehabilitation","$5M–$25M","High","Very High"],
-              ["Botswana","Manganese / Cu-Ni","Specialty dairy / poultry","$3M–$20M","Low","Med-High"],
-              ["Zambia","Emeralds (Lufwanyama)","Commercial dairy + UHT","$3M–$15M","Low-Mod","High"]
-            ].map((row, i) => (
-              <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                {row.map((cell, j) => (
-                  <td key={j} style={{ padding: "10px 14px", fontWeight: j === 0 ? 700 : 300, color: j === 0 ? "#fff" : "rgba(255,255,255,0.65)", fontSize: 12 }}>{cell}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-        {[
-          ["Phase 01 · Year 1–2","Zambia — Lowest Friction","Apply through ZDA for Lufwanyama emerald license + Central Province dairy farm simultaneously. Emerald operation is faster cash; dairy is the long-term business. Budget: $5–9M."],
-          ["Phase 02 · Year 2–4","Botswana — Build on Track Record","Use Zambia cash flows to fund manganese exploration in Botswana's North East District. Initiate lapidary operation (semi-precious stones for Jaipur/Surat) concurrently. Budget: $2–4M."],
-          ["Phase 03 · Year 3–6","Zimbabwe — After Political Access Confirmed","Enter only after confirming a credible BEE partner with Ministry of Mines access. Target lithium pegmatite claims in Bikita-Mberengwa and Goromonzi-Marondera belts. Budget: $8–20M."],
-          ["Opportunistic","The Gambia — Strategic Option","UHT dairy + poultry operation ($2–4M) builds goodwill and creates a profitable base. Asymmetric upside if offshore oil confirmed within 5 years. Hold as a position at low priority."]
-        ].map(([num, title, body]) => (
-          <div key={num} style={{ background: "#111", padding: "24px", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#c8973a", marginBottom: 6 }}>{num}</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 10 }}>{title}</div>
-            <div style={{ fontSize: 12, fontWeight: 300, color: "rgba(255,255,255,0.6)", lineHeight: 1.75 }}>{body}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.08)", padding: "24px 28px", marginTop: 2 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#c8973a", marginBottom: 10 }}>The Gujarati Advantage — Concluding Note</div>
-        <p style={{ fontSize: 13, fontWeight: 300, color: "rgba(255,255,255,0.75)", lineHeight: 1.8, margin: 0 }}>The investor group's Gujarati identity is a commercial asset of the highest order. Direct gemstone market access to Jaipur and Surat, 60+ years of diaspora trust in Zambia and Zimbabwe, and community-embedded investor credibility with African governments — <strong style={{ color: "#fff", fontWeight: 600 }}>these advantages are worth more than any tax incentive or concession discount the government can offer.</strong> Use them deliberately, early, and generously.</p>
-      </div>
-    </div>
-  );
-
-  return (
-    <div style={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', background: "#f0efed", minHeight: "100vh" }}>
-      {/* Nav */}
-      <div style={{ background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: 52, position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span style={{ fontSize: 18, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>EXALT</span>
-          <span style={{ fontSize: 8, fontWeight: 300, letterSpacing: "0.22em", textTransform: "uppercase", color: "#666" }}>Strategic Advisory</span>
-        </div>
-        <div style={{ display: "flex", gap: 2, overflowX: "auto" }}>
-          {sections.map(s => (
-            <button key={s} onClick={() => { setActiveSection(s); setExpandedSector(null); setShowPolitical(false); if (["Gambia","Zimbabwe","Botswana","Zambia"].includes(s)) setActiveCountry(s.toLowerCase().replace(" ","_").replace("the_","").trim() === "gambia" ? "gambia" : s.toLowerCase()); }}
-              style={{ background: activeSection === s ? "rgba(255,255,255,0.1)" : "none", border: "none", color: activeSection === s ? "#fff" : "#666", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 10px", cursor: "pointer", borderRadius: 3, whiteSpace: "nowrap" }}>
-              {s}
-            </button>
-          ))}
-        </div>
-        <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "#c8973a", border: "1px solid #c8973a", padding: "3px 8px", whiteSpace: "nowrap" }}>Confidential</div>
-      </div>
-
-      {/* Country sub-nav */}
-      {["Gambia","Zimbabwe","Botswana","Zambia"].includes(activeSection) && (
-        <div style={{ background: "#111", display: "flex", gap: 0, padding: "0 24px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          {countries.map(c => (
-            <button key={c.id} onClick={() => { setActiveCountry(c.id); setExpandedSector(null); setShowPolitical(false); setActiveSection(c.name.replace("The ","")); }}
-              style={{ background: activeCountry === c.id ? "rgba(255,255,255,0.06)" : "none", border: "none", borderBottom: activeCountry === c.id ? "2px solid #c8973a" : "2px solid transparent", color: activeCountry === c.id ? "#fff" : "#666", fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", padding: "10px 14px", cursor: "pointer" }}>
-              {c.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Content */}
-      <div style={{ background: "#fff", margin: "0", minHeight: 500 }}>
-        {activeSection === "Summary" && renderSummary()}
-        {["Gambia","Zimbabwe","Botswana","Zambia"].includes(activeSection) && renderCountry()}
-        {activeSection === "Matrix" && renderMatrix()}
-      </div>
-
-      {/* Footer */}
-      <div style={{ background: "#050505", padding: "32px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: "#fff", letterSpacing: "-0.02em" }}>EXALT</div>
-          <div style={{ fontSize: 8, fontWeight: 300, letterSpacing: "0.22em", textTransform: "uppercase", color: "#555" }}>Strategic Advisory</div>
-        </div>
-        <div style={{ fontSize: 10, color: "#555", textAlign: "right", lineHeight: 1.8 }}>
-          Strictly Confidential — Not for Distribution<br />
-          Prepared for Private Investor Group · March 2026<br />
-          © EXALT Strategic Advisory 2026
+        <div class="callout political" style="margin-top:16px;">
+          <div class="cl">The Gujarati Advantage</div>
+          <p>Gujarati traders have operated in Eastern and Southern Africa since the 1880s. This history creates diaspora network access, government credibility, and direct gemstone market relationships that no Western or Chinese competitor can replicate.</p>
         </div>
       </div>
     </div>
-  );
-}
+  </div>
+</section>
+
+<!-- THE GAMBIA -->
+<section id="gambia" class="country-section">
+  <div class="country-header-bar">
+    <div class="container">
+      <div class="country-num">Country 01 of 04</div>
+      <div class="country-name">The Gambia</div>
+      <div class="country-tagline">West Africa's smallest nation — emerging democracy, frontier hydrocarbon potential, underdeveloped dairy and consumer goods sectors</div>
+      <div class="country-stats">
+        <div class="country-stat"><div class="sv">2.7M</div><div class="sk">Population</div></div>
+        <div class="country-stat"><div class="sv">$2.1B</div><div class="sk">GDP</div></div>
+        <div class="country-stat"><div class="sv">Banjul</div><div class="sk">Capital</div></div>
+        <div class="country-stat"><div class="sv">Moderate</div><div class="sk">Political Risk</div></div>
+        <div class="country-stat"><div class="sv">GMD</div><div class="sk">Currency</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+
+    <div class="sector-block">
+      <div class="callout political">
+        <div class="cl">Political Entry Strategy</div>
+        <p><strong>Key relationship:</strong> NPP party network and Ministry of Trade, Industry, Regional Integration and Employment. GIEPA (Gambia Investment and Export Promotion Agency) facilitates introductions to the President's office for projects above $1M. A community investment fund focused on rural employment in the Central River Division — Barrow's home region — generates significant political goodwill at low cost. 2026 elections are approaching, making this an ideal moment to be seen as bringing jobs and development.</p>
+      </div>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Mining</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:45%"></div></div><span class="score-val">45/100</span></div>
+      </div>
+      <p class="body-text">The Gambia is not a conventional mining country — tiny land area, no significant hard-rock geology, no systematic modern mineral survey. However two specific opportunities exist at the right scale.</p>
+      <h4 class="play-head">Play 1 — Coastal Heavy Mineral Sands (Ilmenite, Zircon, Rutile)</h4>
+      <p class="body-text">The Atlantic coastline sits on the same geological belt as Senegal's TiZir Grande Cote operation — one of the world's largest mineral sand operations. Gambian coastal strip has been mapped with similar ilmenite, zircon, and rutile concentrations.</p>
+      <ul class="play-list">
+        <li><strong>Exploration cost:</strong> Auger drilling program $300,000–600,000. Commercial grade confirmation within 12–18 months.</li>
+        <li><strong>If confirmed:</strong> Small-scale dredge and wet concentrator processing 500,000 t/yr costs $4–8M. Revenue: $3–6M/yr (ilmenite $150–250/t, zircon $1,400+/t).</li>
+        <li><strong>Political angle:</strong> No Gambian government has ever had a formal minerals sector. Offer 10–15% carried interest to a government-designated entity. Being the first is a powerful proposition to the Barrow administration.</li>
+        <li><strong>Risk:</strong> Coastline is The Gambia's primary tourism asset. Target sites north of Barra and in the Lower River Division, away from tourist beaches.</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Silica Sand for Regional Export</h4>
+      <p class="body-text">High-purity silica sand in the Gambia River estuary. Demand for industrial silica (glass, foundries) growing rapidly in Nigeria and Senegal. Simple extraction, washing, and bagging operation for regional export. Capital: $500,000–1.5M. Fast payback.</p>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Dairy &amp; Agriculture</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:62%"></div></div><span class="score-val">62/100</span></div>
+      </div>
+      <p class="body-text">The Gambia imports approximately 90% of its packaged dairy from Senegal and Europe. Zero formal domestic dairy processing. The Banjul-Serekunda-Kanifing conurbation (~1M people) is fully import-dependent. This is the clearest first-mover commercial opportunity in the country.</p>
+      <h4 class="play-head">Play 1 — Small-Scale UHT and Pasteurized Milk Plant</h4>
+      <ul class="play-list">
+        <li><strong>What:</strong> UHT pasteurization and packaging facility processing 5,000–10,000 litres/day. Source milk from Central and Upper River Division herds and cross-border Senegalese Fulani pastoralist supply.</li>
+        <li><strong>Investment:</strong> UHT line $1.5–3M + cold chain $500,000. Total: $2–4M.</li>
+        <li><strong>Revenue:</strong> At 5,000 litres/day retail ($0.80–1.00/litre): $1.4–1.8M/yr. Gross margin 30–40% once supply is stable.</li>
+        <li><strong>Political angle:</strong> "Made in The Gambia" branding, 40–80 direct jobs. Access to government procurement (hospitals, schools).</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Groundnut Oil Processing</h4>
+      <p class="body-text">Gambia exports raw groundnuts at commodity prices with almost zero value-added processing. A groundnut oil pressing and packaging facility for domestic retail and regional export is proven and low-complexity.</p>
+      <ul class="play-list">
+        <li><strong>Investment:</strong> Continuous screw press (10 t/day): $600,000–1.2M.</li>
+        <li><strong>Revenue:</strong> Groundnut oil at $1.20–1.60/litre in West African markets. At 10 t/day (~4,000 litres oil): $1.7–2.3M/yr.</li>
+        <li><strong>Note:</strong> Source directly from farmer cooperatives — avoid the Gambia Groundnut Corporation to sidestep bureaucratic delays.</li>
+      </ul>
+      <h4 class="play-head">Play 3 — Integrated Broiler Poultry Operation</h4>
+      <p class="body-text">Frozen chicken from Brazil and Europe dominates the Banjul market. Fresh chilled local chicken commands a 40–60% premium. A vertically integrated broiler operation (day-old chicks, feed mill, grow-out farms, abattoir) is the most capital-efficient agro-processing play in the country. Scale: 50,000 birds/cycle, 6–7 cycles/year. Investment: $1.5–2.5M.</p>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Infrastructure &amp; Energy</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:70%"></div></div><span class="score-val">70/100</span></div>
+      </div>
+      <h4 class="play-head">Solar Mini-Grid Development</h4>
+      <p class="body-text">NAWEC provides less than 12 hours of reliable power/day in Banjul and almost nothing in rural areas. The Rural Electrification Agency has identified 400+ villages suitable for solar mini-grids. Building, owning, and operating a portfolio of 10–20 village mini-grids (50–200kW solar + battery storage each) generates tariff revenue under government-guaranteed offtake. Capital: $3–6M for 10 grids. Revenue: $400,000–700,000/yr under a 15–20 year concession.</p>
+      <div class="highlight-box" style="margin-top:24px;">
+        <div class="hl">The Oil Wildcard</div>
+        <p>Senegal's Sangomar oil field came online in 2024. The Gambia's offshore blocks sit in the same geological basin. BP holds exploration licenses on several Gambian blocks. <strong>If commercial hydrocarbons are confirmed within 3–5 years, the country's investment landscape transforms entirely.</strong> An investor positioned in infrastructure and processing before this confirmation would benefit enormously from the subsequent boom.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ZIMBABWE -->
+<section id="zimbabwe" class="country-section">
+  <div class="country-header-bar">
+    <div class="container">
+      <div class="country-num">Country 02 of 04</div>
+      <div class="country-name">Zimbabwe</div>
+      <div class="country-tagline">Africa's most resource-rich underperformer — extraordinary mineral endowment, high political complexity, highest ceiling upside on this list</div>
+      <div class="country-stats">
+        <div class="country-stat"><div class="sv">16.3M</div><div class="sk">Population</div></div>
+        <div class="country-stat"><div class="sv">$26.3B</div><div class="sk">GDP</div></div>
+        <div class="country-stat"><div class="sv">Harare</div><div class="sk">Capital</div></div>
+        <div class="country-stat"><div class="sv">High</div><div class="sk">Political Risk</div></div>
+        <div class="country-stat"><div class="sv">ZiG / USD</div><div class="sk">Currency</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+
+    <div class="sector-block">
+      <div class="callout political">
+        <div class="cl">Political Entry Strategy</div>
+        <p><strong>Enter through ZIDA (Zimbabwe Investment and Development Agency) combined with a ZANU-PF-connected BEE partner holding 20–35% genuine equity.</strong> The BEE partner must have Ministry of Mines access — the gatekeeper for all mineral concessions. Political donations through the ZANU-PF Development Fund or direct constituency development project sponsorship in Mashonaland or Midlands provinces. The Harare Gujarati business community is the single most important first call — engage them before any government approach. Power sits across two factions: Mnangagwa's camp and VP Chiwenga's military establishment — understand both.</p>
+      </div>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Mining</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:92%"></div></div><span class="score-val">92/100</span></div>
+      </div>
+      <p class="body-text">The Great Dyke — a 550km geological intrusion running north to south through the country — contains the world's second-largest platinum group metal reserves and second-largest chromite reserves. Zimbabwe is now emerging as a globally important lithium producer. This is the primary investment thesis.</p>
+      <h4 class="play-head">Play 1 — Lithium Pegmatite Mining (Most Compelling Opportunity)</h4>
+      <p class="body-text">The Arcadia Lithium project near Harare was acquired by Huayou Cobalt (China) for $422M in 2022 — demonstrating the asset quality available. Several smaller pegmatite claims in the same belts remain unlicensed or under-explored and are accessible at this investor's scale.</p>
+      <ul class="play-list">
+        <li><strong>Target:</strong> Exploration licenses for lithium-bearing pegmatite claims in the Bikita-Mberengwa belt and Goromonzi-Marondera belt east of Harare. Claims can still be pegged for nominal fees. Exploration program: $500,000–1.5M.</li>
+        <li><strong>Exit or develop:</strong> Confirmed resource can be sold to a Chinese or Australian lithium company for $5–30M, or developed into a small hard-rock mine ($8–20M capex for 50,000 t/yr spodumene concentrate).</li>
+        <li><strong>Political angle:</strong> Zimbabwe banned raw lithium export in 2022 — only processed concentrate or hydroxide may leave the country. A local processing commitment (flotation plant) is mandatory and makes the government actively supportive of a licensed operation.</li>
+        <li><strong>Returns:</strong> Spodumene concentrate trades at $700–1,200/t. A 50,000 t/yr operation generates $35–60M annual revenue against $8–12M operating costs — exceptional on $15–20M total investment.</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Chrome Mining and Ferrochrome</h4>
+      <ul class="play-list">
+        <li><strong>Target:</strong> Small chrome ore claims along the Great Dyke (Mutorashanga to Shurugwi). JV or acquire 2–3 adjacent claims. Small open-pit operation: 30,000–60,000 t/yr chromite ore concentrate.</li>
+        <li><strong>Investment:</strong> $3–8M capex. Revenue: Chrome ore at $140–220/t; 50,000 t/yr = $7–11M.</li>
+        <li><strong>Upgrade:</strong> Adding a small ferrochrome smelter ($8–15M extra) converts raw ore to value-added product at $900–1,200/t — roughly 5–6x the raw ore value.</li>
+        <li><strong>Avoid competing with:</strong> Chinese incumbents Sinosteel and Zimasco on established operations. Target underdeveloped claims only.</li>
+      </ul>
+      <h4 class="play-head">Play 3 — Artisanal Gold Aggregation and Formalization</h4>
+      <p class="body-text">Zimbabwe's informal artisanal gold sector likely matches the 30+ tonne formal annual output — most sold outside formal channels. Establish a licensed gold buying and processing center aggregating small-scale producer output and delivering to Fidelity Printers and Refiners (mandatory state buyer). Trading and services model — lower capital ($1–3M), faster returns. The Mnangagwa government has made gold formalization a stated priority and will support a licensed aggregator actively.</p>
+      <div class="avoid-box">
+        <div class="al">What to Avoid in Zimbabwe</div>
+        <p><strong>Diamonds</strong> — Marange fields are controlled by ZCDC, a state entity with deep military involvement. Not investable for a foreign mid-scale investor. <strong>PGMs</strong> — Requires $100M+ capital. Existing claims held by Zimplats and Anglo American. Scale mismatch.</p>
+      </div>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Dairy &amp; Agriculture</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:58%"></div></div><span class="score-val">58/100</span></div>
+      </div>
+      <p class="body-text">Fast-track land reform 2000–2008 collapsed commercial farming. The dairy herd fell from 100,000 cows to fewer than 22,000. Domestic production still meets less than 40% of national demand — a structural gap that represents significant commercial opportunity.</p>
+      <h4 class="play-head">Play 1 — Dairy Farm Rehabilitation in Mashonaland</h4>
+      <p class="body-text">Former commercial dairy farms in Mashonaland East, West, and Central have been reallocated under 99-year leases. Many have existing (dilapidated) dairy infrastructure. New leaseholders lack the capital to rehabilitate and operate the dairy component.</p>
+      <ul class="play-list">
+        <li><strong>Model:</strong> Rehabilitate dairy infrastructure on 2–4 leased farms working with leaseholders (not displacing them). Introduce Holstein or Jersey crosses. Centralized UHT processing facility. Avoids land tenure risk entirely.</li>
+        <li><strong>Investment:</strong> Farm rehabilitation ($300,000–600,000/farm) + UHT unit ($1.5–2.5M) + vehicles. Total: $4–8M for 10,000 litre/day operation.</li>
+        <li><strong>Revenue:</strong> Branded UHT milk in Harare retail at $1.10–1.40/litre. Annual revenue: $4–5.1M.</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Soya Bean Processing</h4>
+      <p class="body-text">Significant soya production in Mashonaland. A soya crushing and expeller plant producing soya oil and soya cake for Zimbabwe's recovering poultry and livestock sectors. Capital: $1.5–2.5M. Annual revenue: $3–5M at 15–20% operating margins.</p>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Infrastructure &amp; Energy</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:62%"></div></div><span class="score-val">62/100</span></div>
+      </div>
+      <h4 class="play-head">Captive Solar Power for Mining Operations</h4>
+      <p class="body-text">Zimbabwe's grid provides 8–16 hours of load-shedding per day. Any mining investment must budget for captive power. A 2–5MW solar-plus-storage installation costs $1.5–4M, eliminates diesel dependency, and can sell excess power to neighboring industrial consumers under a licensed IPP agreement. Payback at displaced diesel costs: 4–6 years. After that, power is effectively free.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- BOTSWANA -->
+<section id="botswana" class="country-section">
+  <div class="country-header-bar">
+    <div class="container">
+      <div class="country-num">Country 03 of 04</div>
+      <div class="country-name">Botswana</div>
+      <div class="country-tagline">Africa's governance benchmark — lowest risk entry, historic political transition in 2024, manganese and copper-nickel are the new frontier plays</div>
+      <div class="country-stats">
+        <div class="country-stat"><div class="sv">2.6M</div><div class="sk">Population</div></div>
+        <div class="country-stat"><div class="sv">$19.3B</div><div class="sk">GDP</div></div>
+        <div class="country-stat"><div class="sv">Gaborone</div><div class="sk">Capital</div></div>
+        <div class="country-stat"><div class="sv">Low</div><div class="sk">Political Risk</div></div>
+        <div class="country-stat"><div class="sv">BWP (Pula)</div><div class="sk">Currency</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+
+    <div class="sector-block">
+      <div class="callout political">
+        <div class="cl">Political Entry Strategy</div>
+        <p><strong>Botswana requires the least political engineering of any country on this list.</strong> The Botswana Investment and Trade Centre (BITC) is a genuinely functional, non-corrupt investment promotion agency. File through BITC, engage the Ministry of Mineral Resources, Green Technology and Energy Security, and request a ministerial meeting. The Debswana model — 50/50 JV between government and private investor — is the expected template. Build a 15–20% carried interest for a government-designated entity into any mining proposal from the outset. The new Boko administration (in power since Nov 2024, the first opposition win since 1966) actively needs economic diversification wins — a strong entry moment.</p>
+      </div>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Mining</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88/100</span></div>
+      </div>
+      <h4 class="play-head">Play 1 — Manganese Mining, Kalahari Field (Most Compelling)</h4>
+      <p class="body-text">The Kalahari Manganese Field straddles the Botswana-South Africa border and is one of the world's largest manganese deposits. The South African side (Hotazel) produces actively. The Botswana side — around Serule and the Nata-Maun corridor — contains significant undeveloped deposits identified by geological surveys but not commercially developed.</p>
+      <ul class="play-list">
+        <li><strong>How to enter:</strong> Manganese exploration licenses in the North East District (Serule block) and Central District (Dukwe-Nata corridor) available through the Department of Mines. A credible application will be processed within 3–6 months.</li>
+        <li><strong>Investment:</strong> Exploration drill program: $1–2M. Small open-pit operation (50,000–100,000 t/yr): $8–15M capex.</li>
+        <li><strong>Revenue:</strong> Manganese ore (37%+ Mn) at $4.50–6.00/dmtu. 100,000 t/yr at 40% Mn = $18–24M annual revenue against $8–10M operating costs.</li>
+        <li><strong>Logistics:</strong> Road transport to Beit Bridge (SA) adds $30–50/t — manageable at current prices. TransKalahari Railway (when complete) will dramatically reduce this cost.</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Copper-Nickel Tailings Reprocessing (Selebi-Phikwe)</h4>
+      <p class="body-text">The BCL mine at Selebi-Phikwe was placed in liquidation in 2016. The tailings dam contains approximately 100 million tonnes at 0.4–0.6% copper and 0.2–0.3% nickel. Modern froth flotation can recover these values economically at today's copper ($8,000+/t) and nickel ($15,000+/t) prices.</p>
+      <ul class="play-list">
+        <li><strong>Investment:</strong> Tailings reprocessing facility producing 2,000–3,000 t/yr copper-in-concentrate: $10–18M.</li>
+        <li><strong>Political angle:</strong> Selebi-Phikwe became a ghost town after BCL closed — 5,000 jobs lost. An investor credibly proposing to reemploy 500–1,000 former BCL workers will receive red carpet treatment. This is a stated Boko government political commitment.</li>
+      </ul>
+      <h4 class="play-head">Play 3 — Semi-Precious Stones and Lapidary (Low Capital, High Visibility)</h4>
+      <p class="body-text">Botswana has agate, jasper, and decorative granite deposits that are currently unworked. A small lapidary and stone-cutting operation exporting to Jaipur and Surat gem markets requires $300,000–600,000 capital, leverages the investor group's Gujarati networks directly, and creates useful political visibility as a job-creating, export-oriented business.</p>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Dairy &amp; Agriculture</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:52%"></div></div><span class="score-val">52/100</span></div>
+      </div>
+      <h4 class="play-head">Play 1 — Specialty Dairy and Artisan Cheese</h4>
+      <p class="body-text">South African mass-market dairy dominates and is difficult to compete with on price. The premium and specialty segment is genuinely underserved. Gaborone has a significant expatriate population, a growing affluent Batswana middle class, and numerous 4–5 star hotels and safari lodges paying premium prices for quality dairy.</p>
+      <ul class="play-list">
+        <li><strong>What:</strong> 200–400 cow artisan dairy (Holstein or Jersey) producing fresh milk, yoghurt, soft cheese, and butter for premium retail and hospitality in Gaborone and the safari lodge corridor.</li>
+        <li><strong>Location:</strong> South East District around Lobatse or Kanye — suitable land, Gaborone Dam water access, 60–90 minutes from city.</li>
+        <li><strong>Investment:</strong> Land lease, fencing, borehole, milking parlor, pasteurizer, cheese room: $1.5–2.5M. Herd (300 quality cows): $400,000–600,000. Total: $2–3.1M.</li>
+        <li><strong>Revenue:</strong> Premium fresh milk at P12–15/litre vs P8 for SA imports. Artisan cheese at P80–120/kg. 300-cow herd at 8 litres/day = 2,400 litres/day. Annual milk revenue: $600,000–900,000 plus substantial cheese margin.</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Broiler Poultry Complex</h4>
+      <p class="body-text">Significant frozen chicken imports from South Africa and Brazil. A 100,000-bird broiler complex near Gaborone using locally produced sorghum and maize for feed supplies the urban market with fresh chilled chicken at a premium. Investment: $2–3.5M. Annual revenue potential at scale: $2–4M.</p>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Infrastructure &amp; Energy</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:70%"></div></div><span class="score-val">70/100</span></div>
+      </div>
+      <p class="body-text">Botswana receives 2,400+ kWh/m2/year of solar irradiance — among the world's highest. A 5–10MW captive solar installation is licensable as an IPP under the 2017 Electricity Supply Act, serving the investor's own mining operation and selling excess power to industrial neighbors. Capital: $4–8M for a 5MW installation. Payback: 5–7 years. The Boko government has expressed early interest in green hydrogen (solar + electrolysis) — a pilot project here would attract significant DFI co-financing.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ZAMBIA -->
+<section id="zambia" class="country-section">
+  <div class="country-header-bar">
+    <div class="container">
+      <div class="country-num">Country 04 of 04</div>
+      <div class="country-name">Zambia</div>
+      <div class="country-tagline">Southern Africa's reform story — Hichilema's open-door investment climate, world-class emeralds, severe dairy deficit, copper country reconnecting to global markets</div>
+      <div class="country-stats">
+        <div class="country-stat"><div class="sv">20.6M</div><div class="sk">Population</div></div>
+        <div class="country-stat"><div class="sv">$29.4B</div><div class="sk">GDP</div></div>
+        <div class="country-stat"><div class="sv">Lusaka</div><div class="sk">Capital</div></div>
+        <div class="country-stat"><div class="sv">Low-Moderate</div><div class="sk">Political Risk</div></div>
+        <div class="country-stat"><div class="sv">ZMW (Kwacha)</div><div class="sk">Currency</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+
+    <div class="sector-block">
+      <div class="callout political">
+        <div class="cl">Best Political Entry of All Four Countries</div>
+        <p><strong>President Hichilema is himself a businessman.</strong> His administration created a one-stop investment shop through the Zambia Development Agency (ZDA). He has personally received Indian investor delegations. A properly structured proposal through ZDA with a note through India's High Commission in Lusaka will receive a ministerial response within weeks. <strong>Zambia's established Gujarati business community</strong> — concentrated in Lusaka, Kitwe, and Ndola — is the single most valuable activation resource and should be engaged before any government approach.</p>
+      </div>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Mining</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:88%"></div></div><span class="score-val">88/100</span></div>
+      </div>
+      <div class="highlight-box">
+        <div class="hl">The Defining Opportunity — Emeralds for a Gujarati Investor</div>
+        <p>The global colored gemstone trade — emeralds, rubies, sapphires — is dominated by Indian trading families, predominantly Gujarati (Surat, Jaipur, Mumbai). This investor group has an intrinsic competitive advantage that no Chinese, Western, or local Zambian investor can replicate: <strong>direct market relationships with the cutters, dealers, and auction buyers who determine the price.</strong> Owning a Zambian emerald mine and selling directly into Jaipur and Surat networks eliminates the 30–50% intermediary margin that auction buyers currently extract. This is a structural profit advantage built into the investor's identity.</p>
+      </div>
+      <h4 class="play-head">Play 1 — Emerald Mining, Kafubu Belt, Lufwanyama (Highest Priority)</h4>
+      <p class="body-text">The Kafubu emerald belt in Lufwanyama District, Copperbelt Province, is the world's most important source of gem-quality emeralds. Zambian emeralds are prized for their distinctive bluish-green color. Kagem (57.75% Gemfields PLC) produced 41 million carats in 2023, generating approximately $120M in auction revenue. The Kafubu belt has multiple artisanal and small-scale mining (ASM) claims alongside Kagem's large-scale operation.</p>
+      <ul class="play-list">
+        <li><strong>How to enter:</strong> Acquire or consolidate 2–4 adjacent small-scale mining licenses in the Lufwanyama belt into a single properly managed operation. The Hichilema government has specifically targeted emerald sector formalization as a priority.</li>
+        <li><strong>Investment:</strong> License acquisition and community compensation: $200,000–500,000. Equipment (excavators, wash plants, sorters): $800,000–1.5M. Security and site infrastructure: $300,000–500,000. Total: $1.5–3M.</li>
+        <li><strong>Revenue:</strong> A small operation producing 2–5 million carats/yr at average $2–8/carat = $4–40M/yr depending on quality mix. Extraordinary return on $2–3M investment.</li>
+        <li><strong>Specific ask to government:</strong> Preferential small-scale mining license in Lufwanyama, 5-year royalty holiday on first $3M production value (available under the Mines and Minerals Development Act), and permission to export to a Mauritius or UAE trading entity for direct on-sale to Indian buyers — bypassing the Singapore auction process entirely.</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Manganese, Southern Province (Choma-Kalomo)</h4>
+      <p class="body-text">Recent surveys identified manganese deposits in Southern Province. A 30,000–50,000 t/yr open-pit operation with road transport to Beit Bridge and Kazungula border crossings for South African steel mill export. Capital: $5–10M. Revenue: $5–9M/yr at current prices. Lower-profile but reliable cash generation.</p>
+      <h4 class="play-head">Play 3 — Limestone and Construction Aggregates (Cash-Generating Base)</h4>
+      <p class="body-text">Lusaka Basin has substantial limestone deposits. A quarrying and aggregates operation serving Lusaka's rapidly growing construction sector requires $1–3M capital and generates consistent cash flow at low operational complexity. Works well as a cash-generative base business supporting more capital-intensive investments elsewhere in the portfolio.</p>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Dairy &amp; Agriculture</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:80%"></div></div><span class="score-val">80/100</span></div>
+      </div>
+      <p class="body-text">Zambia has the most compelling dairy investment case of any country on this list. Population of 20.6M growing at 3%+/yr; Lusaka grew from 2.5M to 3.5M+ in one decade; rising middle-class incomes; and almost no formal domestic dairy production relative to demand. The national herd is approximately 3 million cattle but almost none are dairy breeds or managed for milk production.</p>
+      <h4 class="play-head">Play 1 — Commercial Dairy Farm, Central or Southern Province</h4>
+      <p class="body-text">Central Province (Mkushi, Serenje), Southern Province (Mazabuka, Choma), and Eastern Province (Chipata) offer good rainfall, permanent water sources, established maize and soya production for feed, and good road access to Lusaka.</p>
+      <ul class="play-list">
+        <li><strong>Scale:</strong> 500–800 cow commercial dairy farm (Holstein Friesian or SA Friesian cross) producing 8–12 litres/cow/day.</li>
+        <li><strong>Investment:</strong> Land lease, farm development, fencing, water: $500,000–1M. Herd (700 quality cows): $700,000–1.1M. Milking parlor and refrigeration: $400,000–600,000. Total: $1.6–2.7M.</li>
+        <li><strong>Raw milk revenue:</strong> 700 cows x 10 litres/day = 7,000 litres/day. At $0.35–0.45/litre farmgate: $900,000–1.15M/yr. Real value is in processing.</li>
+      </ul>
+      <h4 class="play-head">Play 2 — Dairy Processing Plant, Lusaka</h4>
+      <p class="body-text">Parmalat (South African) is the dominant packaged dairy brand in Zambia but it is an importer, not a local processor. Zambian-produced UHT milk, yoghurt, and cheese can be sold at competitive prices while retaining 40–60% gross margins that the import chain surrenders.</p>
+      <ul class="play-list">
+        <li><strong>Investment:</strong> 20,000 litre/day UHT pasteurization and packing plant in Lusaka: $3–5M installed.</li>
+        <li><strong>Revenue:</strong> UHT retail in Lusaka at $0.90–1.25/litre. Annual revenue at 20,000 litres/day: $6.5–9M. At 40% gross margin: EBITDA of $2.6–3.6M/yr.</li>
+        <li><strong>ZDA incentives:</strong> Zambia imports $80M+ dairy annually. Replacing 20% of this import bill qualifies for a 5-year tax holiday, import duty exemption on equipment, and VAT exemption on capital goods.</li>
+      </ul>
+      <h4 class="play-head">Play 3 — Cattle Feedlot and Beef Processing</h4>
+      <p class="body-text">Buy lean cattle from smallholders, finish on locally produced maize and soya, supply small abattoir for the Lusaka urban market. Politically popular — creates a market for smallholder cattle. Investment: $2–4M for a 5,000-head feedlot and processing facility. A finished animal of 250kg deadweight generates ZMW 20,000–30,000 ($900–1,350) in retail revenue.</p>
+      <h4 class="play-head">Play 4 — Soya and Sunflower Oil Processing</h4>
+      <p class="body-text">Zambia is Eastern Africa's largest soya producer. A soya crushing plant producing soya oil and soya cake for the domestic market — strong demand from Zambia's growing poultry sector — requires $1.5–3M capital and generates $3–6M annual revenue at 15–22% operating margins.</p>
+    </div>
+
+    <div class="sector-block">
+      <div class="sector-label">
+        <span class="sector-label-text">Infrastructure &amp; Energy</span>
+        <div class="sector-score"><div class="score-track"><div class="score-fill" style="width:68%"></div></div><span class="score-val">68/100</span></div>
+      </div>
+      <h4 class="play-head">Cold Chain Logistics Network</h4>
+      <p class="body-text">The single biggest constraint on dairy and agricultural development in Zambia is cold chain infrastructure. A private cold chain logistics company — refrigerated transport plus cold storage hubs in Lusaka, Kitwe, Livingstone, and Chipata — serves both the investor's own dairy operation and third-party food businesses. Investment: $3–6M. A revenue-generating business in its own right and a critical enabler for the dairy processing operation.</p>
+      <h4 class="play-head">Solar IPP for Copperbelt Industrial Users</h4>
+      <p class="body-text">Frequent load-shedding despite significant hydropower capacity. A 10–20MW solar IPP licensed by ZESCO to supply industrial consumers directly under a wheeling arrangement generates stable USD-denominated revenue. Capital: $8–16M. Revenue: $2.5–5M/yr at industrial tariff rates.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- MATRIX -->
+<section id="matrix" class="matrix-bg">
+  <div class="container">
+    <div class="section-eyebrow">Summary</div>
+    <h2 class="section-title">Comparative Matrix &amp; Recommended Sequencing</h2>
+    <p class="section-lead">A side-by-side view of the best opportunities across all four countries, followed by the recommended investment sequencing for this investor profile.</p>
+
+    <div class="summary-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Country</th><th>Best Mining Play</th><th>Best Dairy / Agri Play</th><th>Entry Capital</th><th>Political Risk</th><th>Return Potential</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>The Gambia</td><td>Coastal mineral sands / silica</td><td>UHT dairy + poultry integration</td><td>$2M–$6M</td><td>Moderate</td><td>Medium</td></tr>
+          <tr><td>Zimbabwe</td><td>Lithium pegmatites / chrome ore</td><td>Dairy rehabilitation / soya</td><td>$5M–$25M</td><td>High</td><td>Very High</td></tr>
+          <tr><td>Botswana</td><td>Manganese / tailings Cu-Ni</td><td>Specialty dairy / broiler poultry</td><td>$3M–$20M</td><td>Low</td><td>Medium-High</td></tr>
+          <tr><td>Zambia</td><td>Emeralds (Lufwanyama belt)</td><td>Commercial dairy + UHT plant</td><td>$3M–$15M</td><td>Low-Moderate</td><td>High</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="phase-grid">
+      <div class="phase-card">
+        <div class="phase-num">Phase 01 &nbsp;·&nbsp; Year 1–2</div>
+        <div class="phase-title">Zambia — Lowest Friction, Highest Clarity</div>
+        <div class="phase-body">Register in Zambia with a Mauritius holding entity (favorable DTAA). Apply through ZDA for a small-scale mining license in the <strong>Lufwanyama emerald belt</strong> concurrently with establishing a <strong>dairy farm in Central Province</strong>. The emerald operation is the faster cash generator; the dairy is the longer-term larger business. They require different government departments and can develop fully in parallel. <strong>Budget: $5–9M for both initial phases.</strong></div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">Phase 02 &nbsp;·&nbsp; Year 2–4</div>
+        <div class="phase-title">Botswana — Build on Track Record</div>
+        <div class="phase-body">Use Zambia cash flows to fund a <strong>manganese exploration program in Botswana's North East District</strong>. Legal and regulatory clarity means licensing risk is low and exploration results will be reliable. If the resource is confirmed, develop or sell to a larger operator. The <strong>lapidary operation</strong> (semi-precious stones for Jaipur/Surat) can be initiated concurrently as a relationship-building exercise with the Boko government. <strong>Budget: $2–4M exploration phase.</strong></div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">Phase 03 &nbsp;·&nbsp; Year 3–6</div>
+        <div class="phase-title">Zimbabwe — After Political Access is Confirmed</div>
+        <div class="phase-body">Zimbabwe is the highest-return opportunity but requires the most careful political preparation. Use Phases 1 and 2 to build a regional track record. Enter Zimbabwe only after confirming a credible <strong>BEE partner with genuine Ministry of Mines access</strong>. Target <strong>lithium pegmatite claims</strong> in the Bikita-Mberengwa and Goromonzi-Marondera belts. <strong>Budget: $8–20M depending on specific asset secured.</strong></div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">Opportunistic &nbsp;·&nbsp; Alongside Core Portfolio</div>
+        <div class="phase-title">The Gambia — Strategic Option</div>
+        <div class="phase-body">Treat as a strategic option, not a core allocation. A modest investment in a <strong>UHT dairy and poultry operation ($2–4M)</strong> builds political goodwill, creates a profitable local business, and positions the group well if <strong>offshore oil is confirmed within 5 years</strong>. The asymmetric upside — small investment now, potentially transformative returns if hydrocarbons are confirmed — makes this worth holding as a position even at low priority.</div>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:48px;">
+      <div class="hl">The Gujarati Advantage — A Concluding Note</div>
+      <p>The investor group's Gujarati identity is not background context — it is a commercial asset of the highest order. In Zambia and Zimbabwe, where Indian-origin businesses have operated for 60+ years, the entry friction for a well-networked Gujarati investor is dramatically lower than for a Western PE fund or a Chinese SOE. The relationships, the trust, the community embedding, the direct gemstone market access to Jaipur and Surat — <strong>these advantages are worth more than any tax incentive or concession discount the government can offer.</strong> Use them deliberately, early, and generously.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo-main">EXALT</div>
+        <div class="footer-logo-sub">Strategic Advisory</div>
+      </div>
+      <div class="footer-note">
+        Strictly Confidential — Not for Distribution<br>
+        Prepared for Private Investor Group &nbsp;|&nbsp; March 2026<br>
+        &copy; EXALT Strategic Advisory 2026. All rights reserved.<br>
+        This document does not constitute investment advice.
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
